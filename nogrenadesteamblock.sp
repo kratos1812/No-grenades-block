@@ -17,7 +17,7 @@ public Plugin myinfo =
 	name = "No Team Grenades Block",
 	author = "kRatoss",
 	description = "Prevent grenades to get blocked by teammates.",
-	version = "1.0"
+	version = "1.1"
 };
 
 public void OnPluginStart()
@@ -57,6 +57,21 @@ public void OnEntityCreated(int entity, const char[] classname)
 	}
 }
 
+public void OnEntityDestroyed(int entity)
+{
+	// Make sure the entity is valid.
+	if(entity > MaxClients && IsValidEdict(entity) && IsValidEntity(entity))
+	{
+		int index = g_pGrenadeRef.FindValue(EntIndexToEntRef(entity));
+		// Remove grenade entry from arraylist.
+		if(index != -1)
+		{
+			g_pGrenadeRef.Erase(index);
+			g_pGrenadeTeam.Erase(index);	
+		}
+	}
+}
+
 public void SDK_OnEntitySpawnPost(int entity)
 {
 	// Make sure the entity still exists.
@@ -92,10 +107,6 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 			index = g_pGrenadeRef.FindValue(EntIndexToEntRef(ent2));
 			if(index != -1 && g_pGrenadeTeam.Get(index) == GetClientTeam(ent1))
 			{
-				// Remove grenade entry from arraylist.
-				g_pGrenadeRef.Erase(index);
-				g_pGrenadeTeam.Erase(index);
-				
 				// Modify the result.
 				result = false;
 				return Plugin_Changed;
